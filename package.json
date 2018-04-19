@@ -18,5 +18,13 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/naver/image-sprite-webpack-plugin.git"
-  }
+  },
+  "keywords": [
+    "webpack",
+    "webpack-plugin",
+    "stylesheet",
+    "css-loader",
+    "css",
+    "spritesmith"
+  ]
 }
