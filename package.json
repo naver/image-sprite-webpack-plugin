@@ -1,0 +1,18 @@
+{
+  "name": "image-sprite-webpack-plugin",
+  "version": "0.1.0",
+  "description": "Image Sprite Plugin for Webpack.",
+  "main": "ImageSpritePlugin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Shim Heungwoon <hw.shim@navercorp.com>",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^2.3.2",
+    "css": "^2.2.1",
+    "figures": "^2.0.0",
+    "spritesmith": "^3.3.0",
+    "vinyl": "^2.1.0"
+  }
+}
