@@ -8,7 +8,7 @@
 const chalk = require('chalk');
 const css = require('css');
 const figures = require('figures');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const Spritesmith = require('spritesmith');
 const Vinyl = require('vinyl');
@@ -167,8 +167,11 @@ class ImageSpritePlugin {
                 logger.nl();
                 logger.log('Writing', spritedPath, '...');
                 try {
+                    const spritedDir = path.dirname(spritedPath);
                     if (this.isWDS) {
-                        this.fs.mkdirpSync(path.dirname(spritedPath));
+                        this.fs.mkdirpSync(spritedDir);
+                    } else {
+                        this.fs.ensureDirSync(spritedDir);
                     }
                     this.fs.writeFileSync(
                         spritedPath,
