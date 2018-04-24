@@ -27,5 +27,10 @@
     "css-loader",
     "css",
     "spritesmith"
+  ],
+  "files": [
+    "ImageSpritePlugin.js",
+    "LICENSE",
+    "README.md"
   ]
 }
