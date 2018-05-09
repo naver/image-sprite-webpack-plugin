@@ -2,7 +2,7 @@
   "name": "image-sprite-webpack-plugin",
   "version": "0.2.0",
   "description": "Image Sprite Plugin for Webpack.",
-  "main": "ImageSpritePlugin.js",
+  "main": "src/ImageSpritePlugin.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
