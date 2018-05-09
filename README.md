@@ -1,7 +1,6 @@
 # image-sprite-webpack-plugin
 
 > A webpack plugin that generates spritesheets from your stylesheets.
-> This plugin is based on https://github.com/Ensighten/spritesmith.
  
 ## Input
  
@@ -15,7 +14,9 @@ h1.logo {
 
 span.itemPicture {
     display: inline-block;
-    background: url(./img/item-picture.png) no-repeat 0 0;
+    background-image: url(./img/item-picture.png);
+	background-repeat: no-repeat;
+	background-position: 0 0;
     width: 36px;
     height: 36px;
 }
@@ -27,15 +28,18 @@ span.itemPicture {
 h1.logo {
   width: 240px;
   height: 80px;
-  background: url(/css/sprite.png) no-repeat 0 0
-  /* url(/img/logo.png) no-repeat 0 0 */;
+  background: url(/css/sprite.png) no-repeat 0 -20px;
+  /* background: url(/img/logo.png) no-repeat 0 0 */
   font-size: 0;
 }
 
 span.itemPicture {
   display: inline-block;
-  background: url(/css/sprite.png) no-repeat 0 -90px
-  /* url(/img/item-picture.png) no-repeat 0 0 */;
+  background-image: url(/css/sprite.png);
+  /* background-image: url(/img/item-picture.png) */
+  background-repeat: no-repeat;
+  background-position: -100px -90px;
+  /* background-position: 0 0 */
   width: 36px;
   height: 36px;
 }
@@ -61,16 +65,16 @@ new ImageSpritePlugin({
     indent: '',
     log: true,
     //outputPath: './public',
-    outputFilename: 'css/sprite.png',
+    outputFilename: 'css/sprite-[hash].png',
     padding: 10,
-    suffix: '?' + Date.now()
+    suffix: '' + Date.now() // do not need to use it with a outputFilename's [hash].
 })
 ```
 
-```
+```bash
 git clone this repository
 npm i
-cd example
+cd examples/webpack4-cssloader-single-chunk
 npm i
 npm run build
 ```
@@ -93,31 +97,79 @@ new ImageSpritePlugin({
 })
 ```
 
-```
+```bash
 git clone this repository
 npm i
-cd example
+cd examples/webpack4-cssloader-single-chunk
 npm i
 npm start
 ```
 
+## More Examples
+
+* [webpack3 + css-loader](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack3-cssloader-single-chunk) (Supports Hot Module Reload)
+* [webpack3 + css-loader + extract-text + multiple chunks](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack3-extract-text-multiple-chunks) (recommended in production env.)
+* [webpack4 + css-loader](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-cssloader-single-chunk) (Supports Hot Module Reload)
+* [webpack4 + css-loader + extract-text4.x(beta) + single chunk](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-extract-text-single-chunk) (Works, but not recommended.)
+* [webpack4 + css-loader + mini-css-extract + multiple chunks](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-mini-css-extract-multiple-chunks) (with webpack4, this option is recommended.)
+
+## NPM Commands in Examples
+
+Each example has the following command.
+
+* Creates a production build.
+
+	```bash
+	npm run build
+	```
+
+* Starts webpack-dev-server
+
+	```bash
+	npm start
+	```
+
+* Creates a production build with node inspector. (with chrome://inspect/#devices)
+
+	```bash
+	npm run build-debug
+	```
+
+* Starts webpack-dev-server with node inspector. (with chrome://inspect/#devices)
+
+	```bash
+	npm run start-debug
+	```
+
 ## Dependency
 
-This plugin utilizes [ExtractTextPlugin](https://github.com/webpack-contrib/extract-text-webpack-plugin) and [css-loader](https://github.com/webpack-contrib/css-loader) to parse .css assets.
+This plugin requires [css-loader](https://github.com/webpack-contrib/css-loader) to handle CssModule.
+
+## Compatibility
+
+* Tested on webpack3 and webpack4
+* Works fine with [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin) on webpack4 (See [example](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-mini-css-extract-multiple-chunks))
+* Works with [extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin)
+	* Works with webpack3 + extract-text-webpack-plugin 3.x
+	* Works with webpack4 + extract-text-webpack-plugin 4.x
 
 ## Options
 
 |Name|Type|Default|Description|
 |:--|:--|:-----|:----------|
-|**commentOrigin**|{Boolean}|`false`|Shows the original image resource url with a comment|
+|**commentOrigin**|{Boolean}|`false`|Shows the original image resource url with a comment. ![image](https://user-images.githubusercontent.com/7447396/39823778-bb47a324-53e8-11e8-8fc5-484c13363040.png)|
 |**compress**|{Boolean}|`false`|Compress the output css|
 |**extensions**|{Array}|`['png', 'jpg', 'jpeg', 'gif']`|File extensions to be converted with the spritesheets|
 |**indent**|{String}|`'  '` (2 spaces)|The indentation for css output source|
 |**log**|{Boolean}|`true`|Enable/disable message logging|
 |**outputPath**|{String}|webpack config's `outputPath`|Describes spritesheets file's output path|
-|**outputFilename**}|{String|`'/sprite/sprite.png'`|A sprite image filename|
+|**outputFilename**}|{String|`'/sprite/sprite-[hash].png'`|A sprite image filename|
 |**padding**|{Number}|`0`|Padding to use between images|
 |**suffix**|{String}|`''`|A suffix for `outputFilename`|
+
+## Bug Report
+
+If you find a bug, please report to us posting [issues](https://github.com/naver/image-sprite-webpack-plugin/issues) on GitHub.
 
 ## License
 image-sprite-webpack-plugin is released under the MIT license.
