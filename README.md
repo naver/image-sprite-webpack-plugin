@@ -15,8 +15,8 @@ h1.logo {
 span.itemPicture {
     display: inline-block;
     background-image: url(./img/item-picture.png);
-	background-repeat: no-repeat;
-	background-position: 0 0;
+    background-repeat: no-repeat;
+    background-position: 0 0;
     width: 36px;
     height: 36px;
 }
@@ -163,7 +163,7 @@ This plugin requires [css-loader](https://github.com/webpack-contrib/css-loader)
 |**indent**|{String}|`'  '` (2 spaces)|The indentation for css output source|
 |**log**|{Boolean}|`true`|Enable/disable message logging|
 |**outputPath**|{String}|webpack config's `outputPath`|Describes spritesheets file's output path|
-|**outputFilename**}|{String|`'/sprite/sprite-[hash].png'`|A sprite image filename|
+|**outputFilename**|{String}|`'/sprite/sprite-[hash].png'`|A sprite image filename|
 |**padding**|{Number}|`0`|Padding to use between images|
 |**suffix**|{String}|`''`|A suffix for `outputFilename`|
 
