@@ -3,7 +3,10 @@
 > A webpack plugin that generates spritesheets from your stylesheets.
  
 ## Input
- 
+
+* `width`, `height` and `background` properties are mandatory to create a sprite.
+* [Shorthand properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties) are recommended.
+
 ```css
 h1.logo {
     width: 240px;
@@ -111,6 +114,7 @@ npm start
 * [webpack4 + css-loader](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-cssloader-single-chunk) (Supports Hot Module Reload)
 * [webpack4 + css-loader + extract-text4.x(beta) + single chunk](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-extract-text-single-chunk) (Works, but not recommended.)
 * [webpack4 + css-loader + mini-css-extract + multiple chunks](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-mini-css-extract-multiple-chunks) (with webpack4, this option is recommended.)
+* [webpack4 + css-loader + mini-css-extract + multiple chunks + svg](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-mini-css-extract-multiple-chunks-svg) (svgs are not supported yet.)
 
 ## NPM Commands in Examples
 
@@ -142,7 +146,8 @@ Each example has the following command.
 
 ## Dependency
 
-This plugin requires [css-loader](https://github.com/webpack-contrib/css-loader) to handle CssModule.
+* This plugin requires [css-loader](https://github.com/webpack-contrib/css-loader) to handle CssModule.
+* It is also recommended that you use a [file-loader](https://github.com/webpack-contrib/file-loader) to automatically move and access image resource files.
 
 ## Compatibility
 
