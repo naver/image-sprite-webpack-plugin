@@ -2,7 +2,8 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
-const ImageSpritePlugin = require('../../src/ImageSpritePlugin');
+const ImageSpritePlugin = require('image-sprite-webpack-plugin');
+// const ImageSpritePlugin = require('../../src/ImageSpritePlugin');
 
 const IS_DEV = process.env.NODE_ENV === 'development';
 
