@@ -1,0 +1,15 @@
+{
+  "name": "some-npm-package",
+  "version": "0.1.0",
+  "description": "Some local package for testing multiple chunks",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Shim Heungwoon <hw.shim@navercorp.com>",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^15.3.1"
+  }
+}
