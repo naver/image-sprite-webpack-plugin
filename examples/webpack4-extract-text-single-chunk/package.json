@@ -22,7 +22,7 @@
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^3.2.0",
-    "image-sprite-webpack-plugin": "^0.2.1",
+    "image-sprite-webpack-plugin": "^0.2.2",
     "react-hot-loader": "^4.1.2",
     "some-npm-package": "file:some-npm-package",
     "style-loader": "^0.21.0",

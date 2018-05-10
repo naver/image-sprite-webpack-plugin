@@ -78,6 +78,10 @@ function isConcatSource(asset) {
     return asset.children && Array.isArray(asset.children);
 }
 
+function warnInvalidResource(url) {
+    logger.warn(`'${url}' is not supported yet.`);
+}
+
 function warnPosition(url, shorthand = true) {
     const what = shorthand ? '<position>' : "'background-position'";
     logger.error(`'${url}' skipped. Please use ${what} as '0 0'`);
@@ -573,6 +577,10 @@ class ImageSpritePlugin {
         const { declarations } = decl.parent;
         const { url, local } = this.getImagePathFromStyle(decValue);
         const coord = this._coordinates[local];
+        if (!coord) {
+            warnInvalidResource(url);
+            return;
+        }
         const newVal = 'url(' + this.getOutFilePath() + ')';
         decl.value = newVal;
         logger.transformOk(decValue, newVal);
@@ -600,6 +608,10 @@ class ImageSpritePlugin {
         const decValue = decl.value;
         const { url, local } = this.getImagePathFromStyle(decValue);
         const coord = this._coordinates[local];
+        if (!coord) {
+            warnInvalidResource(url);
+            return;
+        }
         const newVal = 'url(' + this.getOutFilePath() + ') no-repeat ' + getPosition(coord);
         decl.value = newVal;
         logger.transformOk(decValue, newVal);
@@ -632,6 +644,10 @@ class ImageSpritePlugin {
                     warnPosition(rawRequest, false);
                 } else if (bgRepeat && bgPosition) {
                     const coord = this.getCoordinates(module);
+                    if (!coord) {
+                        warnInvalidResource(rawRequest);
+                        return;
+                    }
                     warnShorthand(rawRequest);
                     const newImgVal = `url(${this.getOutFilePath()})`;
                     bgImage.declaration.value = newImgVal;
@@ -676,6 +692,10 @@ class ImageSpritePlugin {
                     warnPosition(rawRequest);
                 } else {
                     const coord = this.getCoordinates(module);
+                    if (!coord) {
+                        warnInvalidResource(rawRequest);
+                        return;
+                    }
                     const newVal = `url(${this.getOutFilePath()}) no-repeat ${getPosition(coord)}`;
                     declaration.value = newVal;
                     const origin = getAssetNameFromModule(module);

@@ -1,6 +1,6 @@
 {
   "name": "image-sprite-webpack-plugin",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Image Sprite Plugin for Webpack.",
   "main": "src/ImageSpritePlugin.js",
   "scripts": {

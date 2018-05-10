@@ -35,10 +35,10 @@ function white(str) {
     return str;
 }
 
-const prefixError = red(PACKAGE + figures.cross);
+const prefixError = red(PACKAGE + ' ' + figures.cross);
 const prefixLog = green(PACKAGE);
-const prefixOk = green(PACKAGE + figures.tick);
-const prefixWarn = yellow(PACKAGE + figures.warning);
+const prefixOk = green(PACKAGE + ' ' + figures.tick);
+const prefixWarn = yellow(PACKAGE + ' ' + figures.warning);
 
 class Logger {
 
