@@ -1,8 +1,9 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 const webpack = require('webpack');
-const ImageSpritePlugin = require('../../src/ImageSpritePlugin');
+const ImageSpritePlugin = require('image-sprite-webpack-plugin');
+// const ImageSpritePlugin = require('../../src/ImageSpritePlugin');
 
 const IS_DEV = process.env.NODE_ENV === 'development';
 
@@ -12,9 +13,8 @@ function recursiveIssuer(m) {
         return recursiveIssuer(m.issuer);
     } else if (m.name) {
         return m.name;
-    } else {
-        return false;
     }
+    return false;
 }
 
 let config = {
@@ -71,8 +71,8 @@ let config = {
             cacheGroups: {
                 commons: {
                     test: /[\\/]node_modules[\\/]/,
-                    name: "vendors",
-                    chunks: "all"
+                    name: 'vendors',
+                    chunks: 'all'
                 },
                 mainStyles: {
                     name: 'main',
@@ -127,7 +127,7 @@ if (IS_DEV) {
             port: 3000,
             public: 'localhost:3000'
         },
-        devtool: '#source-map',
+        devtool: '#source-map'
     });
     config.plugins.push(new webpack.HotModuleReplacementPlugin());
     config.plugins.push(new ImageSpritePlugin({
