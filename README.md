@@ -73,7 +73,6 @@ new ImageSpritePlugin({
 
 ```bash
 git clone this repository
-npm i
 cd examples/webpack4-cssloader-single-chunk
 npm i
 npm run build
@@ -99,7 +98,6 @@ new ImageSpritePlugin({
 
 ```bash
 git clone this repository
-npm i
 cd examples/webpack4-cssloader-single-chunk
 npm i
 npm start
