@@ -1,5 +1,7 @@
 # image-sprite-webpack-plugin
 
+[![npm](https://img.shields.io/npm/v/image-sprite-webpack-plugin.svg)](https://www.npmjs.com/package/image-sprite-webpack-plugin)
+
 > A webpack plugin that generates spritesheets from your stylesheets.
  
 ## Input
