@@ -110,9 +110,6 @@ npm start
 
 ## More Examples
 
-* [webpack2 + css-loader](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack2-cssloader-single-chunk) (Supports Hot Module Reload)
-* [webpack3 + css-loader](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack3-cssloader-single-chunk) (Supports Hot Module Reload)
-* [webpack3 + css-loader + extract-text + multiple chunks](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack3-extract-text-multiple-chunks) (recommended in production env.)
 * [webpack4 + css-loader](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-cssloader-single-chunk) (Supports Hot Module Reload)
 * [webpack4 + css-loader + extract-text4.x(beta) + single chunk](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-extract-text-single-chunk) (Works, but not recommended.)
 * [webpack4 + css-loader + mini-css-extract + multiple chunks](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-mini-css-extract-multiple-chunks) (with webpack4, this option is recommended.)
@@ -153,10 +150,9 @@ Each example has the following command.
 
 ## Compatibility
 
-* Tested on webpack2, webpack3 and webpack4
+* Tested with webpack4
 * Works fine with [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin) on webpack4 (See [example](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-mini-css-extract-multiple-chunks))
 * Works with [extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin)
-	* Works with webpack3 + extract-text-webpack-plugin 3.x
 	* Works with webpack4 + extract-text-webpack-plugin 4.x
 * As you would know, [extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin) and [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin) do not support HMR not yet. So using with these plugins is recommended on a production env.
 
