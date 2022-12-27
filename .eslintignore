@@ -1,1 +1,2 @@
-# /node_modules/* and /bower_components/* ignored by default
+obsolete/*
+__tests__/output/*
