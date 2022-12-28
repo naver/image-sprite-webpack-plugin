@@ -178,7 +178,7 @@ If you find a bug, please report to us posting [issues](https://github.com/naver
 image-sprite-webpack-plugin is released under the MIT license.
 
 ```
-Copyright (c) 2018 NAVER Corp.
+Copyright (c) 2018 ~ 2023 NAVER Corp.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

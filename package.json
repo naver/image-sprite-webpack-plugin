@@ -32,6 +32,8 @@
   "author": "Shim Heungwoon <ajaxlab7@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@types/css": "^0.0.33",
+    "@types/vinyl": "^2.0.7",
     "chalk": "^5.2.0",
     "css": "^3.0.0",
     "figures": "^5.0.0",
