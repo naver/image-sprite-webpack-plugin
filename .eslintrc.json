@@ -13,6 +13,13 @@
   ],
   "rules": {
     "class-methods-use-this": "off",
+    "lines-between-class-members": [
+      "error",
+      "always",
+      {
+        "exceptAfterSingleLine": true
+      }
+    ],
     "import/extensions": "off",
     "import/order": [
       "error",
@@ -52,16 +59,25 @@
       "parser": "@typescript-eslint/parser"
     },
     {
-      "files": ["**/__tests__/**/*", "**/*.{spec,test}.*"],
+      "files": [
+        "**/__tests__/**/*",
+        "**/*.{spec,test}.*"
+      ],
       "env": {
         "jest/globals": true
       },
-      "plugins": ["jest", "jest-dom", "testing-library"],
+      "plugins": [
+        "jest",
+        "jest-dom",
+        "testing-library"
+      ],
       "extends": [
         "plugin:jest/recommended",
         "plugin:jest-dom/recommended"
       ]
     }
   ],
-  "ignorePatterns": ["dist/**/*"]
+  "ignorePatterns": [
+    "dist/**/*"
+  ]
 }

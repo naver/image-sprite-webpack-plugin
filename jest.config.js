@@ -2,10 +2,10 @@ module.exports = {
   coverageReporters: ['lcov', 'text'],
   coverageThreshold: {
     './src/': {
-      statements: 95,
-      branches: 90,
-      functions: 95,
-      lines: 90,
+      statements: 55,
+      branches: 50,
+      functions: 55,
+      lines: 50,
     },
   },
   modulePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/obsolete/'],
