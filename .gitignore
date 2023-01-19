@@ -109,3 +109,5 @@ dist
 !.vscode/launch.json
 
 __tests__/output
+
+examples/example1/output
