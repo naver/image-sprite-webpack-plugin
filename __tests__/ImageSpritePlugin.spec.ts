@@ -5,6 +5,7 @@ import { compile } from './helpers';
 
 const CONFIG: webpack.Configuration = {
   entry: path.resolve(__dirname, 'fixtures/main.js'),
+  mode: 'none',
   output: {
     path: path.resolve(__dirname, 'output/assets'),
     publicPath: '/assets/',
@@ -18,5 +19,12 @@ describe('Sprite image creations', () => {
     const compiler = webpack(CONFIG);
     const stats = await compile(compiler);
     expect(stats).toBeTruthy();
+  });
+
+  it('should run with no errors or warnings', async () => {
+    const compiler = webpack(CONFIG);
+    const stats = await compile(compiler);
+    const { errors, warnings } = stats.compilation;
+    expect([...errors, ...warnings].length).toBe(0);
   });
 });
