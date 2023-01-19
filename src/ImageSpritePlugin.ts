@@ -11,7 +11,8 @@ import path from 'path';
 import css from 'css';
 import Spritesmith from 'spritesmith';
 import Vinyl from 'vinyl';
-import { Compiler } from 'webpack';
+import { AssetInfo, Compilation, Compiler, PathData } from 'webpack';
+import { Logger } from './Logger';
 
 type ImageSpritePluginExtension = 'png' | 'jpg' | 'jpeg' | 'gif';
 
@@ -26,6 +27,7 @@ type ImageSpritePluginOptions = {
   suffix?: string;
 };
 
+const CWD = process.cwd();
 const PLUGIN_NAME = 'image-sprite-webpack-plugin';
 
 export class ImageSpritePlugin {
@@ -33,13 +35,17 @@ export class ImageSpritePlugin {
   private _compress: boolean;
   private _extensions = ['.png', '.jpg', '.jpeg', '.gif'];
   private _indent: string;
+  private _logger: Logger = new Logger();
   private _outputFilename: string;
   private _outputPath?: string;
   private _padding;
   private _suffix;
 
   private _DIST_DIR = '';
-  private _publicPath = '';
+  private _publicPath?:
+    | string
+    | ((pathData: PathData, assetInfo?: AssetInfo | undefined) => string);
+
   private _outFileCache: string | null = null;
   private _chunkMap: Record<string, string> = {};
   private _coordinates: any = null; // TODO any
@@ -68,8 +74,74 @@ export class ImageSpritePlugin {
   apply(compiler: Compiler) {
     const pluginClassName = this.constructor.name;
     compiler.hooks.thisCompilation.tap(pluginClassName, (compilation) => {
-      const logger = compilation.getLogger(PLUGIN_NAME);
-      logger.info('ImageSpritePlugin compiler.hooks.thisCompilation.tap');
+      this._logger = compilation.getLogger(PLUGIN_NAME);
+      // logger.info('ImageSpritePlugin compiler.hooks.thisCompilation.tap');
+
+      this._DIST_DIR = this._outputPath
+        ? path.resolve(CWD, this._outputPath)
+        : compiler.outputPath;
+      this._publicPath = compilation.outputOptions.publicPath;
+
+      // Create additional assets for the compilation
+      compilation.hooks.additionalAssets.tapAsync(
+        pluginClassName,
+        (callback) => {
+          this.createSprite(compilation, (sprite, coordinates) => {
+            if (sprite && coordinates) {
+              this.updateSprite(sprite, coordinates);
+              const source = new RawSource(sprite);
+              const outFile = this.getOutFileName();
+              // eslint-disable-next-line no-param-reassign
+              compilation.assets[outFile] = source;
+              this._logger.info(
+                outFile,
+                `(${source.source().length} bytes) created.`
+              );
+              if (this.isInlineCss(compilation)) {
+                this.transformJs(compilation);
+              } else {
+                this.transformCss(compilation);
+              }
+            }
+            callback();
+          });
+        }
+      );
     });
+  }
+
+  /**
+   * Creates a sprite sheet then run the given callback
+   * @param {Compilation} compilation
+   * @param {Function} callback
+   */
+  createSprite(
+    compilation: Compilation,
+    callback: (image?: Buffer, coordinates?: Spritesmith.Rectangle) => void
+  ) {
+    const { _logger: logger } = this;
+    const images = this.getSpriteSources(compilation);
+    if (images.length === 0) {
+      callback();
+      return;
+    }
+    logger.log('Creating sprite image from ...');
+    images.forEach((img) => {
+      logger.info(img.path);
+    });
+    Spritesmith.run(
+      {
+        src: images,
+        padding: this._padding,
+      },
+      (err, result) => {
+        if (err) {
+          logger.error(err);
+        } else if (result) {
+          const { image, coordinates } = result;
+          callback(image, coordinates);
+        }
+      }
+    );
   }
 }
