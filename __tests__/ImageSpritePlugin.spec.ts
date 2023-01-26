@@ -4,10 +4,10 @@ import { ImageSpritePlugin } from '../src/ImageSpritePlugin';
 import { compile } from './helpers';
 
 const CONFIG: webpack.Configuration = {
-  entry: path.resolve(__dirname, 'fixtures/main.js'),
+  entry: path.resolve(__dirname, 'fixtures/vanilla/src/main.js'),
   mode: 'none',
   output: {
-    path: path.resolve(__dirname, 'output/assets'),
+    path: path.resolve(__dirname, 'output/vanilla/assets'),
     publicPath: '/assets/',
     filename: 'bundle.js',
   },

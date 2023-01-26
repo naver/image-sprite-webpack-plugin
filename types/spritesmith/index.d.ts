@@ -1,5 +1,3 @@
-import { type } from 'os';
-
 declare module 'spritesmith' {
   export type Rectangle = {
     x: number;

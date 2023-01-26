@@ -88,20 +88,7 @@ export class ImageSpritePlugin {
         (callback) => {
           this.createSprite(compilation, (sprite, coordinates) => {
             if (sprite && coordinates) {
-              this.updateSprite(sprite, coordinates);
-              const source = new RawSource(sprite);
-              const outFile = this.getOutFileName();
-              // eslint-disable-next-line no-param-reassign
-              compilation.assets[outFile] = source;
-              this._logger.info(
-                outFile,
-                `(${source.source().length} bytes) created.`
-              );
-              if (this.isInlineCss(compilation)) {
-                this.transformJs(compilation);
-              } else {
-                this.transformCss(compilation);
-              }
+              // TODO
             }
             callback();
           });
@@ -117,31 +104,33 @@ export class ImageSpritePlugin {
    */
   createSprite(
     compilation: Compilation,
-    callback: (image?: Buffer, coordinates?: Spritesmith.Rectangle) => void
+    callback: (image?: Buffer, coordinates?: Spritesmith.Coordinates) => void
   ) {
     const { _logger: logger } = this;
-    const images = this.getSpriteSources(compilation);
-    if (images.length === 0) {
-      callback();
-      return;
-    }
-    logger.log('Creating sprite image from ...');
-    images.forEach((img) => {
-      logger.info(img.path);
-    });
-    Spritesmith.run(
-      {
-        src: images,
-        padding: this._padding,
-      },
-      (err, result) => {
-        if (err) {
-          logger.error(err);
-        } else if (result) {
-          const { image, coordinates } = result;
-          callback(image, coordinates);
-        }
-      }
-    );
+    callback(); // TODO remove
+    // TODO
+    // const images = this.getSpriteSources(compilation);
+    // if (images.length === 0) {
+    //   callback();
+    //   return;
+    // }
+    // logger.log('Creating sprite image from ...');
+    // images.forEach((img) => {
+    //   logger.info(img.path);
+    // });
+    // Spritesmith.run(
+    //   {
+    //     src: images,
+    //     padding: this._padding,
+    //   },
+    //   (err, result) => {
+    //     if (err) {
+    //       logger.error(err);
+    //     } else if (result) {
+    //       const { image, coordinates } = result;
+    //       callback(image, coordinates);
+    //     }
+    //   }
+    // );
   }
 }
