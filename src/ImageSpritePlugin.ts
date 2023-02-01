@@ -11,7 +11,13 @@ import path from 'path';
 import css from 'css';
 import Spritesmith from 'spritesmith';
 import Vinyl from 'vinyl';
-import { AssetInfo, Compilation, Compiler, PathData } from 'webpack';
+import {
+  AssetInfo,
+  Compilation,
+  Compiler,
+  NormalModule,
+  PathData,
+} from 'webpack';
 import { Logger } from './Logger';
 
 type ImageSpritePluginExtension = 'png' | 'jpg' | 'jpeg' | 'gif';
@@ -25,6 +31,23 @@ type ImageSpritePluginOptions = {
   outputPath?: string;
   padding?: number;
   suffix?: string;
+};
+
+type MapOptions = {
+  columns?: boolean;
+  module?: boolean;
+};
+
+type Source = {
+  size(): number;
+  map(options?: MapOptions): Record<any, any>;
+  sourceAndMap(options?: MapOptions): {
+    source: string | Buffer;
+    map: Record<any, any>;
+  };
+  updateHash(hash: any): void;
+  source(): string | Buffer;
+  buffer(): Buffer;
 };
 
 const CWD = process.cwd();
@@ -89,6 +112,8 @@ export class ImageSpritePlugin {
           this.createSprite(compilation, (sprite, coordinates) => {
             if (sprite && coordinates) {
               // TODO
+              console.log('sprite', sprite);
+              console.log('coordinates', coordinates);
             }
             callback();
           });
@@ -107,30 +132,79 @@ export class ImageSpritePlugin {
     callback: (image?: Buffer, coordinates?: Spritesmith.Coordinates) => void
   ) {
     const { _logger: logger } = this;
-    callback(); // TODO remove
+    const images = this.getSpriteSources(compilation);
+    if (images.length === 0) {
+      logger.log('no images to make a sprite');
+      callback();
+      return;
+    }
+    logger.log('Creating sprite image from ...');
+    images.forEach((img) => {
+      logger.log(img.path);
+    });
+    Spritesmith.run(
+      {
+        src: images,
+        padding: this._padding,
+      },
+      (err, result) => {
+        if (err) {
+          logger.error(err);
+          callback();
+        } else if (result) {
+          const { image, coordinates } = result;
+          callback(image, coordinates);
+        }
+      }
+    );
+  }
+
+  eachImageAssets(
+    compilation: Compilation,
+    callback: (assetName: string, asset: Source) => void
+  ) {
+    const { assets } = compilation;
+    Object.keys(assets).forEach((assetName) => {
+      if (this.isImage(assetName)) {
+        callback(assetName, assets[assetName]);
+      }
+    });
+  }
+
+  /**
+   * @return {Array<Vinyl>}
+   */
+  getSpriteSources(compilation: Compilation) {
+    const sources: Vinyl[] = [];
+    if (this.isInlineCss(compilation)) {
+      this.eachImageAssets(compilation, (assetName, asset) => {
+        const source = asset.source();
+        const contents =
+          typeof source === 'string' ? Buffer.from(source) : source;
+        sources.push(
+          new Vinyl({
+            path: path.join(this._DIST_DIR, assetName),
+            contents,
+          })
+        );
+      });
+      return sources;
+    }
     // TODO
-    // const images = this.getSpriteSources(compilation);
-    // if (images.length === 0) {
-    //   callback();
-    //   return;
-    // }
-    // logger.log('Creating sprite image from ...');
-    // images.forEach((img) => {
-    //   logger.info(img.path);
-    // });
-    // Spritesmith.run(
-    //   {
-    //     src: images,
-    //     padding: this._padding,
-    //   },
-    //   (err, result) => {
-    //     if (err) {
-    //       logger.error(err);
-    //     } else if (result) {
-    //       const { image, coordinates } = result;
-    //       callback(image, coordinates);
-    //     }
-    //   }
-    // );
+    // return this.getSpriteSourcesFromCssAssets(compilation);
+    return [];
+  }
+
+  isImage(fileName: string) {
+    if (typeof fileName === 'string') {
+      return this._extensions.includes(path.extname(fileName));
+    }
+    return false;
+  }
+
+  isInlineCss(compilation: Compilation) {
+    return [...compilation.modules].some((module) => {
+      return this.isImage((module as NormalModule).rawRequest);
+    });
   }
 }
