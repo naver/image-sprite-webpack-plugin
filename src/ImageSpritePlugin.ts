@@ -171,20 +171,14 @@ export class ImageSpritePlugin {
     });
   }
 
-  /**
-   * @return {Array<Vinyl>}
-   */
-  getSpriteSources(compilation: Compilation) {
+  getSpriteSources(compilation: Compilation): Vinyl[] {
     const sources: Vinyl[] = [];
     if (this.isInlineCss(compilation)) {
       this.eachImageAssets(compilation, (assetName, asset) => {
-        const source = asset.source();
-        const contents =
-          typeof source === 'string' ? Buffer.from(source) : source;
         sources.push(
           new Vinyl({
             path: path.join(this._DIST_DIR, assetName),
-            contents,
+            contents: asset.buffer(),
           })
         );
       });
