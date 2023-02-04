@@ -11,7 +11,7 @@ import path from 'path';
 import css from 'css';
 import Spritesmith from 'spritesmith';
 import Vinyl from 'vinyl';
-import {
+import webpack, {
   AssetInfo,
   Compilation,
   Compiler,
@@ -69,12 +69,12 @@ export class ImageSpritePlugin {
     | string
     | ((pathData: PathData, assetInfo?: AssetInfo | undefined) => string);
 
-  private _outFileCache: string | null = null;
+  private _outFileCache: string;
   private _chunkMap: Record<string, string> = {};
-  private _coordinates: any = null; // TODO any
+  private _coordinates: Spritesmith.Coordinates | null = null;
   private _cssAstMap: Record<string, any[]> = {}; // TODO any
   private _imageAssetCandidates: Record<string, any[]> = {}; // TODO any
-  private _sprite: any = null; // TODO any
+  private _sprite: Buffer | null = null;
 
   constructor(option: ImageSpritePluginOptions) {
     if (option.extensions) {
@@ -86,6 +86,7 @@ export class ImageSpritePlugin {
     this._suffix = option.suffix || '';
     this._outputPath = option.outputPath;
     this._outputFilename = option.outputFilename || '/sprite/sprite-[hash].png';
+    this._outFileCache = this._outputFilename;
     this._compress = !!option.compress;
     this._indent =
       typeof option.indent === 'undefined' || !!option.indent.trim()
@@ -106,14 +107,24 @@ export class ImageSpritePlugin {
       this._publicPath = compilation.outputOptions.publicPath;
 
       // Create additional assets for the compilation
+      // https://webpack.js.org/api/compilation-hooks/#additionalassets
       compilation.hooks.additionalAssets.tapAsync(
         pluginClassName,
         (callback) => {
-          this.createSprite(compilation, (sprite, coordinates) => {
-            if (sprite && coordinates) {
-              // TODO
-              console.log('sprite', sprite);
-              console.log('coordinates', coordinates);
+          this.createSprite(compilation, (spriteImage, coordinates) => {
+            if (spriteImage && coordinates) {
+              const source = this.createSpriteSource(spriteImage, coordinates);
+              const outFile = this.getOutFileName();
+              // eslint-disable-next-line no-param-reassign
+              compilation.assets[outFile] = source;
+              this._logger.log(`${outFile} (${source.size()} bytes) created.`);
+              if (this.isInlineCss(compilation)) {
+                // TODO
+                // this.transformJs(compilation);
+              } else {
+                // TODO
+                // this.transformCss(compilation);
+              }
             }
             callback();
           });
@@ -159,6 +170,28 @@ export class ImageSpritePlugin {
     );
   }
 
+  createSpriteSource(
+    spriteImage: Buffer,
+    coordinates: Spritesmith.Coordinates
+  ) {
+    // https://github.com/webpack/webpack-sources#rawsource
+    // https://webpack.js.org/concepts/plugins/
+    const hash = crypto.createHash('md5');
+    const source = new webpack.sources.RawSource(spriteImage);
+    source.updateHash(hash);
+
+    const hex = spriteImage.toString('hex');
+    this._outFileCache = this._outputFilename.replace(
+      '[hash]',
+      hash.update(hex).digest('hex')
+    );
+
+    this._sprite = spriteImage;
+    this._coordinates = coordinates;
+
+    return source;
+  }
+
   eachImageAssets(
     compilation: Compilation,
     callback: (assetName: string, asset: Source) => void
@@ -169,6 +202,10 @@ export class ImageSpritePlugin {
         callback(assetName, assets[assetName]);
       }
     });
+  }
+
+  getOutFileName() {
+    return this._outFileCache;
   }
 
   getSpriteSources(compilation: Compilation): Vinyl[] {

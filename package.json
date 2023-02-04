@@ -38,8 +38,7 @@
     "css": "^3.0.0",
     "figures": "^5.0.0",
     "spritesmith": "^3.4.0",
-    "vinyl": "^3.0.0",
-    "webpack-sources": "^3.2.3"
+    "vinyl": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",

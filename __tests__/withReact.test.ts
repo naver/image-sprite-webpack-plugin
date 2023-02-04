@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack from 'webpack';
@@ -76,5 +77,20 @@ describe('With react', () => {
     const stats = await compile(compiler);
     const { errors, warnings } = stats.compilation;
     expect([...errors, ...warnings].length).toBe(0);
+  });
+
+  it('should generate a correct sprite image', async () => {
+    const compiler = webpack(CONFIG);
+    await compile(compiler);
+    expect(
+      fs.readFileSync(path.resolve(__dirname, 'fixtures/common/sprite.png'))
+    ).toEqual(
+      fs.readFileSync(
+        path.resolve(
+          __dirname,
+          'output/react/assets/sprite/sprite-13af40492def7a57a2cb5c507a17f6ad.png'
+        )
+      )
+    );
   });
 });
