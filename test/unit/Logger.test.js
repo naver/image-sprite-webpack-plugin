@@ -1,4 +1,4 @@
-const Logger = require('../../src/Logger');
+const Logger = require('../../dist/Logger').default;
 
 describe('Logger', () => {
   let originalConsoleLog;

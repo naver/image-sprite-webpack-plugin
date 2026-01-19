@@ -1,5 +1,5 @@
 const path = require('path');
-const ImageSpritePlugin = require('../../../src/ImageSpritePlugin');
+const ImageSpritePlugin = require('../../../dist/ImageSpritePlugin').default;
 
 module.exports = {
   mode: 'production',

@@ -1,4 +1,4 @@
-const ImageSpritePlugin = require('../../src/ImageSpritePlugin');
+const ImageSpritePlugin = require('../../dist/ImageSpritePlugin').default;
 
 describe('ImageSpritePlugin', () => {
   describe('constructor', () => {
