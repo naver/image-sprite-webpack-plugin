@@ -1,5 +1,8 @@
+.claude
 .idea
 .tmp
 node_modules
 npm-debug.log
 public
+dist
+coverage
