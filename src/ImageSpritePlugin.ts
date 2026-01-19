@@ -51,12 +51,19 @@ function forEachDeclaration(
 }
 
 function getAssetNameFromModule(module: NormalModule): string | null {
-  // webpack 5: module.assets is deprecated, use buildInfo.assets only
+  // webpack 5: module.assets is deprecated, use buildInfo.filename or buildInfo.assets
   const buildInfo = module.buildInfo as
-    | { assets?: Record<string, unknown> }
+    | { assets?: Record<string, unknown>; filename?: string }
     | undefined
-  if (buildInfo && buildInfo.assets) {
-    return Object.keys(buildInfo.assets)[0]
+  if (buildInfo) {
+    // webpack 5 asset modules use buildInfo.filename
+    if (buildInfo.filename) {
+      return buildInfo.filename
+    }
+    // fallback to buildInfo.assets for older patterns
+    if (buildInfo.assets) {
+      return Object.keys(buildInfo.assets)[0]
+    }
   }
   return null
 }
@@ -655,12 +662,133 @@ class ImageSpritePlugin {
     logger.log(`transforming js asset ${name} ...`)
     logger.nl()
     const replaceable = new ReplaceSource(asset, name)
+    const source = asset.source().toString()
+
+    // Try webpack 5 css-loader template literal approach first
+    if (this.transformJsWebpack5CssLoader(source, replaceable, imageModules)) {
+      compilation.updateAsset(name, replaceable)
+      return
+    }
+
+    // Fallback to legacy __webpack_require__ approach
     imageModules.forEach(mod => {
       this.updateJsBackgroundShorthand(compilation, replaceable, name, mod)
       this.updateJsBackgroundImage(compilation, replaceable, name, mod)
     })
     // webpack 5: use updateAsset instead of direct assignment
     compilation.updateAsset(name, replaceable)
+  }
+
+  /**
+   * Transform JS asset for webpack 5 + css-loader
+   * css-loader generates template literals with variable references like:
+   *   s=new URL(t(234),t.b), h=i()(s)
+   *   `background: url(${h}) no-repeat 0 0;`
+   */
+  private transformJsWebpack5CssLoader(
+    source: string,
+    replaceable: ReplaceSource,
+    imageModules: NormalModule[],
+  ): boolean {
+    // Build moduleId -> assetPath mapping
+    const moduleIdToAsset: Record<string, string> = {}
+    imageModules.forEach(mod => {
+      const assetName = getAssetNameFromModule(mod)
+      if (assetName && mod.id !== undefined && mod.id !== null) {
+        moduleIdToAsset[String(mod.id)] = assetName
+      }
+    })
+
+    if (Object.keys(moduleIdToAsset).length === 0) {
+      return false
+    }
+
+    // Find patterns for both minified and non-minified code:
+    // Production (numeric IDs): ___CSS_LOADER_URL_IMPORT_0___ = new URL(__webpack_require__(234), __webpack_require__.b);
+    // Development (string IDs): ___CSS_LOADER_URL_IMPORT_0___ = new URL(__webpack_require__("./src/img/logo.png"), __webpack_require__.b);
+    // Minified: s=new URL(t(234),t.b)
+    const urlPatterns = [
+      // Non-minified with numeric ID
+      /([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*new URL\([^,]*__webpack_require__\((\d+)\)/g,
+      // Non-minified with string ID (development mode)
+      /([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*new URL\([^)]*__webpack_require__\([^)]*"([^"]+)"\)/g,
+      // Minified with numeric ID
+      /([a-zA-Z_$][a-zA-Z0-9_$]*)=new URL\([a-zA-Z_$][a-zA-Z0-9_$]*\((\d+)\)/g,
+    ]
+    const urlVarToModuleId: Record<string, string> = {}
+    for (const urlPattern of urlPatterns) {
+      let urlMatch
+      while ((urlMatch = urlPattern.exec(source)) !== null) {
+        const urlVar = urlMatch[1]
+        const moduleId = urlMatch[2]
+        if (moduleIdToAsset[moduleId]) {
+          urlVarToModuleId[urlVar] = moduleId
+        }
+      }
+    }
+
+    if (Object.keys(urlVarToModuleId).length === 0) {
+      return false
+    }
+
+    // Find patterns for both minified and non-minified code:
+    // Non-minified: ___CSS_LOADER_URL_REPLACEMENT_0___ = _...getUrl_js__WEBPACK_IMPORTED_MODULE_2___default()(___CSS_LOADER_URL_IMPORT_0___);
+    // Minified: h=i()(s)
+    const getUrlPatterns = [
+      // Non-minified: funcName()(urlVar) - note the double parentheses
+      /([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*[a-zA-Z_$][a-zA-Z0-9_$]*\(\)\(([a-zA-Z_$][a-zA-Z0-9_$]*)\)/g,
+      // Minified: h=i()(s)
+      /([a-zA-Z_$][a-zA-Z0-9_$]*)=[a-zA-Z_$][a-zA-Z0-9_$]*\(\)\(([a-zA-Z_$][a-zA-Z0-9_$]*)\)/g,
+    ]
+    const cssVarToModuleId: Record<string, string> = {}
+    for (const getUrlPattern of getUrlPatterns) {
+      let getUrlMatch
+      while ((getUrlMatch = getUrlPattern.exec(source)) !== null) {
+        const cssVar = getUrlMatch[1]
+        const urlVar = getUrlMatch[2]
+        if (urlVarToModuleId[urlVar]) {
+          cssVarToModuleId[cssVar] = urlVarToModuleId[urlVar]
+        }
+      }
+    }
+
+    if (Object.keys(cssVarToModuleId).length === 0) {
+      return false
+    }
+
+    // Find CSS template literals containing url(${var}) patterns
+    // Pattern: `...background: url(${h}) no-repeat 0 0;...`
+    const cssVars = Object.keys(cssVarToModuleId).join('|')
+    const bgShorthandPattern = new RegExp(
+      `url\\(\\\$\\{(${cssVars})\\}\\)\\s*no-repeat\\s+0\\s+0`,
+      'g',
+    )
+
+    let hasTransformed = false
+    let match
+    while ((match = bgShorthandPattern.exec(source)) !== null) {
+      const cssVar = match[1]
+      const moduleId = cssVarToModuleId[cssVar]
+      const assetName = moduleIdToAsset[moduleId]
+      const assetPath = path.join(this._DIST_DIR!, assetName)
+      const coord = this._coordinates?.[assetPath]
+
+      if (!coord) {
+        continue
+      }
+
+      const originalMatch = match[0]
+      const newValue = `url(${this.getOutFilePath()}) no-repeat ${getPosition(coord)}`
+
+      const startPos = match.index
+      const endPos = startPos + originalMatch.length - 1
+
+      replaceable.replace(startPos, endPos, newValue)
+      logger.transformOk(`url(${assetName}) no-repeat 0 0`, newValue)
+      hasTransformed = true
+    }
+
+    return hasTransformed
   }
 
   private updateCssAst(ast: CssStylesheet): void {
