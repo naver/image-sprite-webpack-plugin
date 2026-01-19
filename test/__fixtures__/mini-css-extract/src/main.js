@@ -1,3 +1,3 @@
-import './style.css';
+import './style.css'
 
-console.log('Mini CSS Extract test fixture loaded');
+console.log('Mini CSS Extract test fixture loaded')

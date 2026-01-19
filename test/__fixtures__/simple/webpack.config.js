@@ -1,5 +1,5 @@
-const path = require('path');
-const ImageSpritePlugin = require('../../../dist/ImageSpritePlugin').default;
+const path = require('path')
+const ImageSpritePlugin = require('../../../dist/ImageSpritePlugin').default
 
 module.exports = {
   mode: 'production',
@@ -31,4 +31,4 @@ module.exports = {
       log: false,
     }),
   ],
-};
+}

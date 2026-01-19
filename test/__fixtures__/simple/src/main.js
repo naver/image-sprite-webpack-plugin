@@ -1,3 +1,3 @@
-import './style.css';
+import './style.css'
 
-console.log('Simple test fixture loaded');
+console.log('Simple test fixture loaded')

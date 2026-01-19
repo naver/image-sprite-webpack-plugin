@@ -1,3 +1,3 @@
-import { More } from './src/More.jsx';
+import { More } from './src/More.jsx'
 
-export { More };
+export { More }

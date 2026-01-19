@@ -1,6 +1,6 @@
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const ImageSpritePlugin = require('../../../dist/ImageSpritePlugin').default;
+const path = require('path')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const ImageSpritePlugin = require('../../../dist/ImageSpritePlugin').default
 
 module.exports = {
   mode: 'production',
@@ -35,4 +35,4 @@ module.exports = {
       log: false,
     }),
   ],
-};
+}
