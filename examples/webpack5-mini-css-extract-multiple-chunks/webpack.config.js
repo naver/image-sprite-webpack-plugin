@@ -1,7 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const path = require('path')
-const ImageSpritePlugin = require('image-sprite-webpack-plugin')
+const { ImageSpritePlugin } = require('image-sprite-webpack-plugin')
 
 const IS_DEV = process.env.NODE_ENV === 'development'
 
@@ -92,7 +92,7 @@ module.exports = {
     },
     historyApiFallback: true,
     hot: true,
-    port: 3000,
+    port: 3001,
   },
   devtool: IS_DEV ? 'source-map' : false,
 }

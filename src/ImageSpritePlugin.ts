@@ -551,26 +551,42 @@ class ImageSpritePlugin {
     return !hasCssAssets
   }
 
-  private parseCssBlock(block: string): ParsedCssBlock {
+  private parseCssBlock(block: string): ParsedCssBlock | null {
     const propertyMap: Record<
       string,
       { declaration: CssDeclaration; index: number }
     > = {}
     const code = block.replace(lineBreak, '')
-    const ast = css.parse(PSEUDO_CLASS + code) as CssStylesheet
-    const { declarations } = ast.stylesheet.rules[0] as CssRule
-    declarations.forEach((decl, i) => {
-      if (decl.type === 'declaration') {
-        const declaration = decl as CssDeclaration
-        propertyMap[declaration.property] = {
-          declaration,
-          index: i,
-        }
+    try {
+      const ast = css.parse(PSEUDO_CLASS + code) as CssStylesheet
+      if (
+        !ast.stylesheet ||
+        !ast.stylesheet.rules ||
+        ast.stylesheet.rules.length === 0
+      ) {
+        return null
       }
-    })
-    return {
-      ast,
-      propertyMap,
+      const rule = ast.stylesheet.rules[0] as CssRule
+      if (!rule.declarations) {
+        return null
+      }
+      const { declarations } = rule
+      declarations.forEach((decl, i) => {
+        if (decl.type === 'declaration') {
+          const declaration = decl as CssDeclaration
+          propertyMap[declaration.property] = {
+            declaration,
+            index: i,
+          }
+        }
+      })
+      return {
+        ast,
+        propertyMap,
+      }
+    } catch {
+      // Failed to parse CSS block - likely not a valid CSS block in JS context
+      return null
     }
   }
 
@@ -738,7 +754,13 @@ class ImageSpritePlugin {
     let occurrence = source.search(syntax)
     while (occurrence > -1) {
       const { start, end, cssBlock } = getCssBlock(source, occurrence)
-      const { ast, propertyMap } = this.parseCssBlock(cssBlock)
+      const parsed = this.parseCssBlock(cssBlock)
+      if (!parsed) {
+        source = source.substring(end)
+        occurrence = source.search(syntax)
+        continue
+      }
+      const { ast, propertyMap } = parsed
       const bgImage = propertyMap['background-image']
       const bgRepeat = propertyMap['background-repeat']
       const bgPosition = propertyMap['background-position']
@@ -785,7 +807,7 @@ class ImageSpritePlugin {
           )
         }
       }
-      source = source.substr(end)
+      source = source.substring(end)
       occurrence = source.search(syntax)
     }
   }
@@ -804,7 +826,13 @@ class ImageSpritePlugin {
     let occurrence = source.search(syntax)
     while (occurrence > -1) {
       const { start, end, cssBlock } = getCssBlock(source, occurrence)
-      const { ast, propertyMap } = this.parseCssBlock(cssBlock)
+      const parsed = this.parseCssBlock(cssBlock)
+      if (!parsed) {
+        source = source.substring(end)
+        occurrence = source.search(syntax)
+        continue
+      }
+      const { ast, propertyMap } = parsed
       if (propertyMap['background']) {
         const { declaration, index } = propertyMap['background']
         // webpack 5: rawRequest may not exist, use userRequest or resource
@@ -830,7 +858,7 @@ class ImageSpritePlugin {
           logger.transformOk(getBackgroundShorthand(rawRequest), newVal)
         }
       }
-      source = source.substr(end)
+      source = source.substring(end)
       occurrence = source.search(syntax)
     }
   }

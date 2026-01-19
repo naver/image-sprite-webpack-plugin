@@ -1,6 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
-const ImageSpritePlugin = require('image-sprite-webpack-plugin')
+const { ImageSpritePlugin } = require('image-sprite-webpack-plugin')
 
 const IS_DEV = process.env.NODE_ENV === 'development'
 
