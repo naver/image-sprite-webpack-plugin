@@ -56,6 +56,30 @@ span.itemPicture {
 npm install -D image-sprite-webpack-plugin
 ```
 
+## Development
+
+### Setup
+
+```bash
+git clone https://github.com/naver/image-sprite-webpack-plugin.git
+cd image-sprite-webpack-plugin
+npm install
+npm run build
+```
+
+### Scripts
+
+| Command | Description |
+|:--------|:------------|
+| `npm run build` | Build TypeScript source |
+| `npm run build:watch` | Build with watch mode |
+| `npm test` | Run tests |
+| `npm run test:watch` | Run tests with watch mode |
+| `npm run test:coverage` | Run tests with coverage report |
+| `npm run lint` | Run ESLint |
+| `npm run format` | Format code with Prettier |
+| `npm run format:check` | Check code formatting |
+
 ## Example
 
 ### Production build
@@ -78,7 +102,7 @@ new ImageSpritePlugin({
 
 ```bash
 git clone this repository
-cd examples/webpack4-cssloader-single-chunk
+cd examples/webpack5-cssloader-single-chunk
 npm i
 npm run build
 ```
@@ -103,17 +127,15 @@ new ImageSpritePlugin({
 
 ```bash
 git clone this repository
-cd examples/webpack4-cssloader-single-chunk
+cd examples/webpack5-cssloader-single-chunk
 npm i
 npm start
 ```
 
 ## More Examples
 
-* [webpack4 + css-loader](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-cssloader-single-chunk) (Supports Hot Module Reload)
-* [webpack4 + css-loader + extract-text4.x(beta) + single chunk](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-extract-text-single-chunk) (Works, but not recommended.)
-* [webpack4 + css-loader + mini-css-extract + multiple chunks](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-mini-css-extract-multiple-chunks) (with webpack4, this option is recommended.)
-* [webpack4 + css-loader + mini-css-extract + multiple chunks + svg](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-mini-css-extract-multiple-chunks-svg) (svgs are not supported yet.)
+* [webpack5 + css-loader](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack5-cssloader-single-chunk) (Supports Hot Module Reload)
+* [webpack5 + css-loader + mini-css-extract + multiple chunks](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack5-mini-css-extract-multiple-chunks)
 
 ## NPM Commands in Examples
 
@@ -150,11 +172,9 @@ Each example has the following command.
 
 ## Compatibility
 
-* Tested with webpack4
-* Works fine with [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin) on webpack4 (See [example](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack4-mini-css-extract-multiple-chunks))
-* Works with [extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin)
-	* Works with webpack4 + extract-text-webpack-plugin 4.x
-* As you would know, [extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin) and [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin) do not support HMR not yet. So using with these plugins is recommended on a production env.
+* Tested with webpack5
+* Works fine with [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin) on webpack5 (See [example](https://github.com/naver/image-sprite-webpack-plugin/tree/master/examples/webpack5-mini-css-extract-multiple-chunks))
+* As you would know, [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin) does not support HMR yet. So using with this plugin is recommended on a production env.
 
 ## Options
 
