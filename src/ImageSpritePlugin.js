@@ -12,8 +12,8 @@ const path = require('path');
 const Spritesmith = require('spritesmith');
 const Vinyl = require('vinyl');
 const { RawSource, ReplaceSource, SourceMapSource } = require('webpack-sources');
+const { Compilation } = require('webpack');
 const Logger = require('./Logger');
-const on = require('./on');
 
 const lineBreak = /\\r?\\n|\\r/g;
 const logger = new Logger();
@@ -33,10 +33,11 @@ function forEachDeclaration(ast, callback) {
 }
 
 function getAssetNameFromModule(module) {
+    // webpack 5: module.assets is deprecated, use buildInfo.assets only
     if (module.buildInfo && module.buildInfo.assets) {
         return Object.keys(module.buildInfo.assets)[0];
     }
-    return Object.keys(module.assets)[0];
+    return null;
 }
 
 function getBackgroundShorthand(url) {
@@ -126,33 +127,41 @@ class ImageSpritePlugin {
     }
 
     apply(compiler) {
-        on(compiler, 'thisCompilation', 'tap', (compilation) => {
+        const pluginName = 'ImageSpritePlugin';
 
+        compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
             this._DIST_DIR = this._outputPath
                 ? path.resolve(CWD, this._outputPath)
                 : compiler.outputPath;
-            this._publicPath = compilation.outputOptions.publicPath;
+            this._publicPath = compilation.outputOptions.publicPath || '/';
 
-            // Create additional assets for the compilation
-            on(compilation, 'additionalAssets', 'tapAsync', (callback) => {
-                this.createSprite(compilation, (sprite, coordinates) => {
-                    if (sprite && coordinates) {
-                        this.updateSprite(sprite, coordinates);
-                        const source = new RawSource(sprite);
-                        const outFile = this.getOutFileName();
-                        compilation.assets[outFile] = source;
-                        logger.ok(logger.emp(outFile),
-                            `(${source.source().length} bytes) created.\n`);
-                        if (this.isInlineCss(compilation)) {
-                            this.transformJs(compilation);
-                        } else {
-                            this.transformCss(compilation);
+            // webpack 5: use processAssets hook (additionalAssets is deprecated)
+            compilation.hooks.processAssets.tapAsync(
+                {
+                    name: pluginName,
+                    stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+                },
+                (assets, callback) => {
+                    this.createSprite(compilation, (sprite, coordinates) => {
+                        if (sprite && coordinates) {
+                            this.updateSprite(sprite, coordinates);
+                            const source = new RawSource(sprite);
+                            const outFile = this.getOutFileName();
+                            // webpack 5: use emitAsset instead of direct assignment
+                            compilation.emitAsset(outFile, source);
+                            logger.ok(logger.emp(outFile),
+                                `(${source.source().length} bytes) created.\n`);
+                            if (this.isInlineCss(compilation)) {
+                                this.transformJs(compilation);
+                            } else {
+                                this.transformCss(compilation);
+                            }
+                            logger.nl();
                         }
-                        logger.nl();
-                    }
-                    callback();
-                });
-            });
+                        callback();
+                    });
+                }
+            );
         });
     }
 
@@ -248,7 +257,12 @@ class ImageSpritePlugin {
      * @return {Array<Chunk>}
      */
     getChangedChunks(compilation) {
-        return compilation.chunks.filter((chunk) => {
+        // webpack 5: compilation.chunks is a Set, convert to Array
+        const chunks = compilation.chunks
+            ? [...compilation.chunks]
+            : [];
+
+        return chunks.filter((chunk) => {
             const oldHash = this._chunkMap[chunk.name];
             this._chunkMap[chunk.name] = chunk.hash;
             return chunk.hash !== oldHash;
@@ -295,9 +309,15 @@ class ImageSpritePlugin {
      * @return {Array<NormalModule>}
      */
     getImageModules(compilation) {
-        // imageModules exists only inline mode
-        return compilation.modules.filter((module) => {
-            return this.isImage(module.rawRequest);
+        // webpack 5: compilation.modules is a Set, convert to Array
+        const modules = compilation.modules
+            ? [...compilation.modules]
+            : [];
+
+        return modules.filter((module) => {
+            // webpack 5: rawRequest may not exist, use userRequest or resource
+            const request = module.rawRequest || module.userRequest || module.resource || '';
+            return this.isImage(request);
         });
     }
 
@@ -443,7 +463,8 @@ class ImageSpritePlugin {
         const result = [];
         const { assets } = compilation;
         const changes = this.getChangedChunks(compilation).map((chunk) => {
-            return chunk.files;
+            // webpack 5: chunk.files is a Set, convert to Array
+            return [...chunk.files];
         });
         Object.keys(assets).forEach((assetName) => {
             const basename = path.basename(assetName);
@@ -468,9 +489,14 @@ class ImageSpritePlugin {
     }
 
     isInlineCss(compilation) {
-        return compilation.modules.some((module) => {
-            return this.isImage(module.rawRequest);
-        });
+        // Check if there are CSS assets (mini-css-extract-plugin or extract-text-webpack-plugin)
+        // If CSS assets exist, CSS is NOT inline (extracted to separate files)
+        const { assets } = compilation;
+        const hasCssAssets = Object.keys(assets).some((assetName) => isCss(assetName));
+
+        // If there are CSS assets, CSS is extracted (not inline)
+        // If there are no CSS assets, CSS is inline in JS (style-loader)
+        return !hasCssAssets;
     }
 
     /**
@@ -520,8 +546,10 @@ class ImageSpritePlugin {
         } else {
             this.updateCssAst(obj);
             const cssSource = this.getCssSource(obj, true);
-            compilation.assets[assetName] = new SourceMapSource(
-                cssSource, assetName, asset.map());
+            // webpack 5: use updateAsset instead of direct assignment
+            const sourceMap = typeof asset.map === 'function' ? asset.map() : null;
+            compilation.updateAsset(assetName, new SourceMapSource(
+                cssSource, assetName, sourceMap));
         }
     }
 
@@ -547,7 +575,8 @@ class ImageSpritePlugin {
             this.updateJsBackgroundShorthand(compilation, replaceable, name, mod);
             this.updateJsBackgroundImage(compilation, replaceable, name, mod);
         });
-        compilation.assets[name] = replaceable;
+        // webpack 5: use updateAsset instead of direct assignment
+        compilation.updateAsset(name, replaceable);
     }
 
     updateCssAst(ast) {
@@ -637,7 +666,8 @@ class ImageSpritePlugin {
             const bgRepeat = propertyMap['background-repeat'];
             const bgPosition = propertyMap['background-position'];
             if (bgImage) {
-                const { rawRequest } = module;
+                // webpack 5: rawRequest may not exist, use userRequest or resource
+                const rawRequest = module.rawRequest || module.userRequest || module.resource || '';
                 if (!bgRepeat || (bgRepeat && bgRepeat.declaration.value !== 'no-repeat')) {
                     warnRepeatStyle(rawRequest, false);
                 } else if (!bgPosition || (bgPosition && bgPosition.declaration.value !== '0 0')) {
@@ -685,7 +715,8 @@ class ImageSpritePlugin {
             const { ast, propertyMap } = this.parseCssBlock(cssBlock);
             if (propertyMap['background']) {
                 const { declaration, index } = propertyMap['background'];
-                const { rawRequest } = module;
+                // webpack 5: rawRequest may not exist, use userRequest or resource
+                const rawRequest = module.rawRequest || module.userRequest || module.resource || '';
                 if (!declaration.value.includes('no-repeat')) {
                     warnRepeatStyle(rawRequest);
                 } else if (!declaration.value.includes(' 0 0')) {
