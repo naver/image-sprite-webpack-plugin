@@ -1,0 +1,32 @@
+{
+  "name": "webpack5-mini-css-extract-multiple-chunks-example",
+  "version": "1.0.0",
+  "description": "image-sprite-webpack-plugin example with webpack5, mini-css-extract-plugin and multiple chunks",
+  "scripts": {
+    "build": "cross-env NODE_ENV=production webpack",
+    "start": "cross-env NODE_ENV=development webpack serve",
+    "build-debug": "cross-env NODE_ENV=production RUN_ENV=inspect node --inspect --debug-brk ./node_modules/webpack/bin/webpack.js",
+    "start-debug": "cross-env NODE_ENV=development RUN_ENV=inspect node --inspect --debug-brk ./node_modules/webpack-dev-server/bin/webpack-dev-server.js"
+  },
+  "author": "Shim Heungwoon <hw.shim@navercorp.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@babel/preset-react": "^7.23.0",
+    "babel-loader": "^9.1.3",
+    "cross-env": "^7.0.3",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.5.3",
+    "image-sprite-webpack-plugin": "file:../..",
+    "mini-css-extract-plugin": "^2.7.6",
+    "some-npm-package": "file:some-npm-package",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

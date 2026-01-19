@@ -1,0 +1,6 @@
+h1.more {
+    width: 240px;
+    height: 80px;
+    background: url(./img/more.png) no-repeat 0 0;
+    font-size: 0;
+}
